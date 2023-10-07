@@ -7,18 +7,22 @@ from datetime import date
 from bestwords import *
 from credentials import *
 
+# closes the pop-ups that appear when the website opens
 def avoid_rules(page):
     page.get_by_test_id('Play').click()
     page.get_by_test_id('icon-close').click()
 
+# presses a letter on the website
 def press_letter(page, key):
     page.locator(f'[data-key={key}]').click()
 
+# enters a guess on the website
 def guess_word(page, word):
     for letter in word:
         press_letter(page, letter)
     press_letter(page, '↵')
 
+# gets the data for a hint from the website
 def get_hints(page, guess_num):
     rows = []
     for i in range(1, 7):
@@ -40,11 +44,13 @@ def get_hints(page, guess_num):
     modified_hints = list(map(replace_absent, hints))
     return modified_hints
 
+# determines if the last guess enterred was the answer
 def all_correct(page, hints):
     if len(hints) == 0:
         return False
     return all([i[1] == 'correct' for i in hints[-1]])
 
+# removes invalid words based on the given hint
 def prune(words, all_hints):
     valid_words = [i for i in words]
     for guess_hints in all_hints:
@@ -64,34 +70,42 @@ def prune(words, all_hints):
     
     return valid_words
 
+# selects a list of the best words to guess based on the given heuristic
 def select_best(words):
     return best_exponential_half_letter_count(words)
 
 words = []
 
+# reads a list of possible words from a text file
 def load_words():
     global words
     with open('selectwords.txt', 'r') as f:
         words = [i.strip('\n').strip('"') for i in f.read().split(',')]
 
+# opens the website, solves the wordle, and sends the results via text
 if __name__ == '__main__':
+    # loads the possible words
     load_words()
 
+    # calculates the current wordle day
     today = date.today()
     start = date(2021, 6, 19)
     day = today - start
-
+ 
     with sync_playwright() as p:
+        # launches a browser and navigates to the wordle website
         browser = p.chromium.launch(channel = 'msedge', headless = False)
         page = browser.new_page()
         page.goto('https://www.nytimes.com/games/wordle/index.html')
         avoid_rules(page)
 
+        # initializes variables
         guesses = []
         hints = []
         plausible = [word for word in words]
         best = []
 
+        # enters guesses until the correct answer is guessed or 6 words have been guessed
         while not all_correct(page, hints) and len(guesses) < 6:
             best = select_best(plausible)
             random.shuffle(best)
@@ -101,6 +115,8 @@ if __name__ == '__main__':
             hints.append(get_hints(page, len(guesses)))
             plausible = prune(words, hints)
 
+        # generates the message to send as a text
+        
         message = ''
 
         message += f'Wordle {day.days} '
@@ -120,6 +136,8 @@ if __name__ == '__main__':
                 else:
                     message += '_'
             message += '\n'
+
+        # sends the message via email
 
         sender_credentials = (sender_email, sender_access_token)
 

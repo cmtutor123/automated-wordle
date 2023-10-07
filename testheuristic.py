@@ -2,16 +2,21 @@ import io
 import random
 from bestwords import *
 
+# reads the list of words from text files
+
 with open('words.txt', 'r') as f:
     words = [i.strip('\n').strip('"') for i in f.read().split(',')]
 
 with open('selectwords.txt', 'r') as f:
     select_words = [i.strip('\n').strip('"') for i in f.read().split(',')]
 
+# initializes variables
+
 results = [' ']
 
 test_count = 0
 
+# generates the hint data given a guess and the wordle answer
 def generate_hint(guess, answer):
     hints = []
     colors = []
@@ -40,6 +45,7 @@ def generate_hint(guess, answer):
                 hints.append([guess[i], 'absent'])
     return hints
 
+# removes all words that are invalid based on the given hint
 def prune(words, guess_hints):
     valid_words = [i for i in words]
     keep_correct = lambda word: all([word[i] == guess_hints[i][0] for i in range(len(word)) if guess_hints[i][1] == 'correct'])
@@ -51,6 +57,7 @@ def prune(words, guess_hints):
     valid_words = list(filter(is_valid, valid_words))
     return valid_words
 
+# starts a test using the given heuristic function
 def start_test(heuristic, name, repetitions):
     global test_count
     test_count += 1
@@ -58,7 +65,8 @@ def start_test(heuristic, name, repetitions):
     add_result("Tested: " + name)
     run_heuristic_test(heuristic, repetitions)
     add_result(' ')
-    
+
+# runs a test using the given heuristic function
 def run_heuristic_test(heuristic, repetitions):
     testCount = 0
     succeedCount = 0
@@ -96,12 +104,16 @@ def run_heuristic_test(heuristic, repetitions):
     add_result("Success Rate: " + str(successRate))
     add_result("Average Guesses: " + str(averageGuesses))
 
+# adds console output
 def add_result(result):
     results.append(result)
 
+# displays console output
 def display_results():
     for result in results:
         print(result)
+
+# runs tests and displays the results
 
 test_repetitions = 10
 

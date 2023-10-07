@@ -8,7 +8,6 @@ from bestwords import *
 from credentials import *
 
 def avoid_rules(page):
-    #page.query_selector('.purr-blocker-card__button').click()
     page.get_by_test_id('Play').click()
     page.get_by_test_id('icon-close').click()
 
@@ -25,9 +24,6 @@ def get_hints(page, guess_num):
     for i in range(1, 7):
         rows.append(page.get_by_label(f'Row {i}'))
     tiles = rows[guess_num-1].get_by_test_id('tile').all()
-    
-    #get_letter = lambda tile: tile.get_attribute('aria-label').split(' ')[0]
-    #get_evaluation = lambda tile: tile.get_attribute('data-state')
 
     get_letter = lambda tile: tile.get_attribute('aria-label').split(',')[1][1].lower()
     get_evaluation = lambda tile: tile.get_attribute('aria-label').split(',')[2].split(' ')[1]
@@ -37,22 +33,17 @@ def get_hints(page, guess_num):
     letters = {i[0]: set() for i in hints}
     for hint in hints:
         letters[hint[0]].add(hint[1])
-
     
     should_replace_absent = lambda letter: len(letters[letter] - set(['absent'])) >= 1
     replace_absent = lambda hint: (hint[0], 'overused') if should_replace_absent(hint[0]) and hint[1] == 'absent' else hint
 
     modified_hints = list(map(replace_absent, hints))
-    #print(modified_hints)
     return modified_hints
 
 def all_correct(page, hints):
     if len(hints) == 0:
         return False
     return all([i[1] == 'correct' for i in hints[-1]])
-
-def generate_hint(word, answer):
-    pass
 
 def prune(words, all_hints):
     valid_words = [i for i in words]
@@ -110,9 +101,6 @@ if __name__ == '__main__':
             hints.append(get_hints(page, len(guesses)))
             plausible = prune(words, hints)
 
-        #print(guesses[-1])
-        #print(hints)
-
         message = ''
 
         message += f'Wordle {day.days} '
@@ -135,8 +123,6 @@ if __name__ == '__main__':
 
         sender_credentials = (sender_email, sender_access_token)
 
-        #print(message)
-
         file_path = 'message.txt'
 
         mime_maintype = 'text'
@@ -149,4 +135,3 @@ if __name__ == '__main__':
             text_file.close()
 
         send_mms_via_email(phone_number, message, file_path, mime_maintype, mime_subtype, provider, sender_credentials, subject='Wordle')
-        

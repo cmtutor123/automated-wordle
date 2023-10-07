@@ -38,7 +38,6 @@ def generate_hint(guess, answer):
                 hints.append([guess[i], 'overused'])
             else:
                 hints.append([guess[i], 'absent'])
-    #print(hints)
     return hints
 
 def prune(words, guess_hints):
@@ -50,7 +49,6 @@ def prune(words, guess_hints):
     move_present = lambda word: all([word[i] != guess_hints[i][0] and guess_hints[i][0] in word for i in range(len(guess_hints)) if guess_hints[i][1] == 'present'])
     is_valid = lambda word: keep_correct(word) and exclude_absent(word) and exclude_overused(word) and move_present(word) and letter_count(word)
     valid_words = list(filter(is_valid, valid_words))
-    #print(valid_words)
     return valid_words
 
 def start_test(heuristic, name, repetitions):
@@ -69,7 +67,6 @@ def run_heuristic_test(heuristic, repetitions):
     allTests = repetitions * len(select_words)
     for answer in select_words:
         for x in range(repetitions):
-            #print("Test " + str(test_count) + ": " + str(testCount + 1) + "/" + str(allTests))
             guesses = []
             hints = []
             plausible = [word for word in select_words]
@@ -106,15 +103,15 @@ def display_results():
     for result in results:
         print(result)
 
-test_repetitions = 2
+test_repetitions = 10
 
-#start_test(best_letter_count,  "best_letter_count", test_repetitions)
-#start_test(best_weighted_letter_count, "best_weighted_letter_count", test_repetitions)
-#start_test(best_letter_position_count, "best_letter_position_count", test_repetitions)
-#start_test(best_mixed_letter_position_count, "best_mixed_letter_position_count", test_repetitions)
-#start_test(best_half_letter_count, "best_half_letter_count", test_repetitions)
-#start_test(best_squared_half_letter_count, "best_squared_half_letter_count", test_repetitions)
-#start_test(best_exponential_half_letter_count, "best_exponential_half_letter_count", test_repetitions)
+start_test(best_letter_count,  "best_letter_count", test_repetitions)
+start_test(best_weighted_letter_count, "best_weighted_letter_count", test_repetitions)
+start_test(best_letter_position_count, "best_letter_position_count", test_repetitions)
+start_test(best_mixed_letter_position_count, "best_mixed_letter_position_count", test_repetitions)
+start_test(best_half_letter_count, "best_half_letter_count", test_repetitions)
+start_test(best_squared_half_letter_count, "best_squared_half_letter_count", test_repetitions)
+start_test(best_exponential_half_letter_count, "best_exponential_half_letter_count", test_repetitions)
 start_test(best_random, "best_random", test_repetitions)
 
 display_results()
